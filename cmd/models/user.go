@@ -120,9 +120,8 @@ func (u *User) ShowInfoAsFollowerUser(rank int) {
 // ---------------------------
 // TODO: 別のファイルに移動する
 func getTwitterClient() *twitter.Client {
-    // TODO: シークレットな値は環境変数にする
-	config := oauth1.NewConfig("", "")
-	token := oauth1.NewToken("", "")
+	config := oauth1.NewConfig(os.Getenv("TWITTER_CONSUMER_KEY"), os.Getenv("TWITTER_CONSUMER_SECRET"))
+	token := oauth1.NewToken(os.Getenv("TWITTER_TOKEN"), os.Getenv("TWITTER_SECRET_TOKEN"))
 	httpClient := config.Client(oauth1.NoContext, token)
 	return twitter.NewClient(httpClient)
 }
