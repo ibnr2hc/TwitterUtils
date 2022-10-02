@@ -58,19 +58,47 @@ func (u *User) ShowRankingByFollowerCount() {
 // ---------------------------
 func (u *User) GetFollowers() []*User {
 	client := getTwitterClient()
-	surveyUserfollowers, _, err := client.Followers.List(&twitter.FollowerListParams{ScreenName: u.ScreenName})
+	var followers []*User
+
+	// フォロワーの情報を取得する
+	var nextCursor int64 = 0
+	var followersList []*User
+	for true {
+		fmt.Println("[Debug] データ取得中... (Cursor: " + strconv.FormatInt(nextCursor, 10) + ")")
+		followersList, nextCursor = u.getFollowers(u.ScreenName, nextCursor, client)
+		followers = append(followers, followersList...)
+
+		// フォロワー数が多い場合にカーソルでデータを取得するため再度処理を行う
+		if nextCursor != 0 {
+			continue
+		} else {
+			break
+		}
+
+	}
+	return followers
+}
+
+func (u *User) getFollowers(screenName string, cursor int64, client *twitter.Client) ([]*User, int64) {
+	var followers []*User
+	var followerListParams *twitter.FollowerListParams
+	if cursor == 0 {
+		followerListParams = &twitter.FollowerListParams{ScreenName: screenName}
+	} else {
+		followerListParams = &twitter.FollowerListParams{Cursor: cursor}
+	}
+
+	surveyUserFollowers, _, err := client.Followers.List(followerListParams)
 	if err != nil {
 		fmt.Println("[Error]: " + err.Error())
 		os.Exit(1)
 	}
 
-	var followers []*User
-	for _, v := range surveyUserfollowers.Users {
+	for _, v := range surveyUserFollowers.Users {
 		followers = append(followers, NewUser(v.ScreenName))
-
-		// TODO: Cursorがある場合にページネーションして読み込む
 	}
-	return followers
+
+	return followers, surveyUserFollowers.NextCursor
 }
 
 // ShowInfoAsSurveyUser

@@ -25,6 +25,7 @@ var followerRankingCmd = &cobra.Command{
 			os.Exit(0)
 		}
 
+		// フォロワー数ランキングを表示する
 		surveyUser.Followers = surveyUser.GetFollowers()
 		surveyUser.ShowRankingByFollowerCount()
 	},
